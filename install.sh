@@ -33,7 +33,7 @@ runCommand(){
 
 source <(curl -s https://raw.githubusercontent.com/JulianGransee/BashSelect.sh/main/BashSelect.sh)
 
-status "Install MariaDB/MySQL and phpmyadmin"
+status "Info"
 
 export OPTIONS=("yes" "no")
 
@@ -41,11 +41,10 @@ bashSelect
 
 case $? in
      0 )
-        phpmaInstall=0;;
+        ;;
      1 )
         ;;
 esac
-
 
 function examServData() {
 
@@ -57,8 +56,8 @@ function examServData() {
 
   cat << EOF > $dir/server-data/server.cfg
   # Only change the IP if you're using a server with multiple network interfaces, otherwise change the port only.
-endpoint_add_tcp "0.0.0.0:30120"
-endpoint_add_udp "0.0.0.0:30120"
+endpoint_add_tcp "0.0.0.0:30125"
+endpoint_add_udp "0.0.0.0:30125"
 # These resources will start by default.
 ensure mapmanager
 ensure chat
@@ -137,19 +136,19 @@ runCommand "apt install -y wget git curl dos2unix net-tools sed screen tmux xz-u
 
 clear
 
-dir=/home/FiveM
+dir=/home/FiveMDev
 
-lsof -i :40120
+lsof -i :40125
 if [[ $( echo $? ) == 0 ]]; then
 
   status "It looks like there already is something running on the default TxAdmin port. Can we stop/kill it?" "/"
-  export OPTIONS=("Kill PID on port 40120" "Exit the script")
+  export OPTIONS=("Kill PID on port 40125" "Exit the script")
   bashSelect
   case $? in
     0 )
-      status "killing PID on 40120"
+      status "killing PID on 40125"
       runCommand "apt -y install psmisc"
-	  runCommand "fuser -4 40120/tcp -k"
+	  runCommand "fuser -4 40125/tcp -k"
       ;;
     1 )
       exit 0
@@ -170,10 +169,6 @@ if [[ -e $dir ]]; then
       exit 0
       ;;
   esac
-fi
-
-if [[ $phpmaInstall == 0 ]]; then
-  bash <(curl -s https://raw.githubusercontent.com/JulianGransee/PHPMyAdminInstaller/main/install.sh) -s
 fi
 
 runCommand "mkdir -p $dir/server" "Create directorys for the FiveM server"
@@ -200,9 +195,9 @@ red="\e[0;91m"
 green="\e[0;92m"
 bold="\e[1m"
 reset="\e[0m"
-port=\$(lsof -Pi :40120 -sTCP:LISTEN -t)
+port=\$(lsof -Pi :40125 -sTCP:LISTEN -t)
 if [ -z "\$port" ]; then
-    screen -dmS fivem sh $dir/server/run.sh
+    screen -dmS fivemdev sh $dir/server/run.sh +set txAdminPort 40125
     echo -e "\n\${green}TxAdmin was started!\${reset}"
 else
     echo -e "\n\${red}The default \${reset}\${bold}TxAdmin\${reset}\${red} is already in use -> Is a \${reset}\${bold}FiveM Server\${reset}\${red} already started?\${reset}"
@@ -222,13 +217,13 @@ status "Create crontab to autostart txadmin (recommended)"
   case $? in
     0 )
       status "Create crontab entry"
-      runCommand "echo \"@reboot         root    cd /home/FiveM/ && bash start.sh\" >> /etc/crontab"
+      runCommand "echo \"@reboot         root    cd /home/FiveMDev/ && bash start.sh\" >> /etc/crontab"
       ;;
     1 )
       sleep 0;;
   esac
 
-port=$(lsof -Pi :40120 -sTCP:LISTEN -t)
+port=$(lsof -Pi :40125 -sTCP:LISTEN -t)
 
 if [[ -z "$port" ]]; then
 
@@ -272,7 +267,7 @@ if [[ -z "$port" ]]; then
     clear
 
     echo -e "\n${green}${bold}TxAdmin${reset}${green} was started successfully${reset}"
-    txadmin="http://$(ifconfig eth0 | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1'):40120"
+    txadmin="http://$(ifconfig eth0 | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1'):40125"
     echo -e "\n\n${red}${uline}Commands just usable via SSH\n"
     echo -e "${red}To ${reset}${blue}start${reset}${red} TxAdmin run -> ${reset}${bold}sh $dir/start.sh${reset} ${red}!\n"
     echo -e "${red}To ${reset}${blue}stop${reset}${red} TxAdmin run -> ${reset}${bold}sh $dir/stop.sh${reset} ${red}!\n"
@@ -286,24 +281,7 @@ if [[ -z "$port" ]]; then
 
     if [[ $phpmaInstall == 0 ]]; then
       echo
-      echo "MariaDB and PHPMyAdmin data:"
-      runCommand "cat /root/.mariadbPhpma"
-      runCommand "rm /root/.mariadbPhpma"
-      rootPasswordMariaDB=$( cat /root/.mariadbRoot )
-      rm /root/.mariadbRoot
-      fivempasswd=$( pwgen 32 1 );
-      mariadb -u root -p$rootPasswordMariaDB -e "CREATE DATABASE fivem;"
-      mariadb -u root -p$rootPasswordMariaDB -e "GRANT ALL PRIVILEGES ON fivem.* TO 'fivem'@'localhost' IDENTIFIED BY '${fivempasswd}';"
-      echo "
-FiveM MySQL-Data
-    User: fivem
-    Password: ${fivempasswd}
-    Database name: fivem
-      FiveM MySQL Connection-String:
-        set mysql_connection_string \"server=127.0.0.1;database=fivem;userid=fivem;password=${fivempasswd}\""
-
-    fi
-    sleep 2
+      echo "Info:"
 
 else
     echo -e "\n${red}The default ${reset}${bold}TxAdmin${reset}${red} port is already in use -> Is a ${reset}${bold}FiveM Server${reset}${red} already running?${reset}"

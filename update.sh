@@ -41,7 +41,7 @@ bashSelect
 dir=${directorys[$?]}/..
 
 
-lsof -i :40120
+lsof -i :40125
 if [[ $( echo $? ) == 0 ]]; then
 
   status "It looks like there is something running on the default TxAdmin port. Can we stop/kill it?" "/"
