@@ -45,13 +45,13 @@ lsof -i :40125
 if [[ $( echo $? ) == 0 ]]; then
 
   status "It looks like there is something running on the default TxAdmin port. Can we stop/kill it?" "/"
-  export OPTIONS=("Kill PID on port 40120" "Exit the script")
+  export OPTIONS=("Kill PID on port 40125" "Exit the script")
   bashSelect
   case $? in
     0 )
-      status "killing PID on 40120"
+      status "killing PID on 40125"
       runCommand "apt -y install psmisc"
-	  runCommand "fuser -4 40120/tcp -k"
+	  runCommand "fuser -4 40125/tcp -k"
       ;;
     1 )
       exit 0
