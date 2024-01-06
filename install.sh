@@ -205,10 +205,10 @@ fi
 EOF
 runCommand "chmod +x $dir/start.sh"
 
-runCommand "echo \"screen -xS fivem\" > $dir/attach.sh"
+runCommand "echo \"screen -xS fivemdev\" > $dir/attach.sh"
 runCommand "chmod +x $dir/attach.sh"
 
-runCommand "echo \"screen -XS fivem quit\" > $dir/stop.sh"
+runCommand "echo \"screen -XS fivemdev quit\" > $dir/stop.sh"
 runCommand "chmod +x $dir/stop.sh"
 
 status "Create crontab to autostart txadmin (recommended)"
